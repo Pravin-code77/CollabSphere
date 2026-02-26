@@ -14,6 +14,7 @@ export interface IProfileDocument extends Document {
     skills: any[];
     availability: string;
     timezone: string;
+    workHours: string;
     githubUsername: string;
     avatarUrl?: string;
 }
@@ -24,6 +25,7 @@ const ProfileSchema: Schema = new Schema({
     skills: [SkillSchema],
     availability: { type: String, default: 'full-time' },
     timezone: { type: String, default: 'UTC' },
+    workHours: { type: String, enum: ['early', 'day', 'afternoon', 'night', 'flexible'], default: 'flexible' },
     githubUsername: { type: String, default: '' },
     avatarUrl: { type: String }
 }, { timestamps: true });

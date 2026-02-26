@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import client from '../api/client';
 
@@ -8,6 +8,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string, username: string) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (updatedUser: any) => Promise<void>;
     loading: boolean;
 }
 
@@ -38,21 +39,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const login = async (email: string, password: string) => {
-        const response = await client.post('/auth/login', { email, password });
-        const { token, user } = response.data;
-        await AsyncStorage.setItem('token', token);
-        await AsyncStorage.setItem('user', JSON.stringify(user));
-        setToken(token);
-        setUser(user);
+        try {
+            const response = await client.post('/auth/login', { email, password });
+            const { token, user } = response.data;
+            await AsyncStorage.setItem('token', token);
+            await AsyncStorage.setItem('user', JSON.stringify(user));
+            setToken(token);
+            setUser(user);
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
+        }
     };
 
     const register = async (email: string, password: string, username: string) => {
-        const response = await client.post('/auth/register', { email, password, username });
-        const { token, user } = response.data;
-        await AsyncStorage.setItem('token', token);
-        await AsyncStorage.setItem('user', JSON.stringify(user));
-        setToken(token);
-        setUser(user);
+        try {
+            await client.post('/auth/register', { email, password, username });
+            // We specifically don't set user/token here so the user has to login manually after register
+        } catch (error) {
+            console.error('Registration error:', error);
+            throw error;
+        }
     };
 
     const logout = async () => {
@@ -62,8 +69,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
     };
 
+    const updateUser = async (updatedUser: any) => {
+        setUser(updatedUser);
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, login, register, logout, updateUser, loading }}>
             {children}
         </AuthContext.Provider>
     );

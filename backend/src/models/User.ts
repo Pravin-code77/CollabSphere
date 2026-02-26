@@ -14,11 +14,10 @@ const UserSchema: Schema = new Schema({
     username: { type: String, required: true, unique: true },
 }, { timestamps: true });
 
-UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+UserSchema.pre('save', async function (this: IUserDocument) {
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password!, salt);
-    next();
 });
 
 UserSchema.methods.comparePassword = async function (password: string) {

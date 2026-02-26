@@ -13,6 +13,7 @@ export interface IProjectDocument extends Document {
     urgency: string;
     teamSize: number;
     status: string;
+    members: mongoose.Types.ObjectId[];
 }
 
 const ProjectSchema: Schema = new Schema({
@@ -22,7 +23,8 @@ const ProjectSchema: Schema = new Schema({
     requiredSkills: [SkillRequirementSchema],
     urgency: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
     teamSize: { type: Number, default: 1 },
-    status: { type: String, enum: ['open', 'in-progress', 'completed'], default: 'open' }
+    status: { type: String, enum: ['open', 'in-progress', 'completed'], default: 'open' },
+    members: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 
 export default mongoose.model<IProjectDocument>('Project', ProjectSchema);
